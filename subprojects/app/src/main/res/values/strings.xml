@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">File Uploader</string>
+    <string name="files_fragment_label">Files</string>
+
+    <!--region FileUploaderService-->
+    <string name="tracking_notification_channel_name">Tracking</string>
+    <string name="uploading_notification_content_title">Uploading Files</string>
+    <string name="uploading_notification_content_text">Files to upload %1$d</string>
+    <!--endregion-->
+</resources>
