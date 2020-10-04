@@ -2,7 +2,6 @@ package com.olderworld.app.uploader
 
 import android.app.Application
 import android.text.format.Formatter
-import androidx.documentfile.provider.DocumentFile
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -26,7 +25,6 @@ internal class FilesViewModel @ViewModelInject constructor(
     val state: LiveData<State> = internalState
 
     fun bind() {
-        internalState.value = State.NoUploads
         rxTasks.updates
             .subscribeOn(Schedulers.computation())
             .map { tasks ->
@@ -51,10 +49,9 @@ internal class FilesViewModel @ViewModelInject constructor(
                     }
                 }
             }
+            .map { if (it.isEmpty()) State.NoUploads else State.ActiveUploads(it) }
             .subscribeBy(
-                onNext = {
-                    internalState.postValue(State.ActiveUploads(it))
-                },
+                onNext = internalState::postValue,
                 onError = {
                     Timber.e(it, "Failed to consume task updates")
                 }

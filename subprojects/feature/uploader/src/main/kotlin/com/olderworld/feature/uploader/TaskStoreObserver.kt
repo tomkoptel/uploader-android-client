@@ -22,11 +22,12 @@ internal class TaskStoreObserver(
         processor.onNext(System.currentTimeMillis())
     }
 
-    override val updates: Flowable<Set<Task>> = processor.onBackpressureLatest()
-        .switchMap {
-            Flowable.fromCallable { delegate.getAll() }.subscribeOn(scheduler)
-        }
-        .doOnError {
-            Timber.e(it, "after transform")
+    override val updates: Flowable<Set<Task>>
+        get() {
+            val fetchAll = Flowable.fromCallable { delegate.getAll() }.subscribeOn(scheduler)
+            val runtimeUpdates = processor.onBackpressureLatest()
+                .switchMap { fetchAll }
+                .doOnError { Timber.e(it, "after transform") }
+            return fetchAll.concatWith(runtimeUpdates)
         }
 }
