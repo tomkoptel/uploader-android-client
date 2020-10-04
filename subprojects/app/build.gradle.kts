@@ -1,18 +1,21 @@
 import buildlogic.libraries.coreUI
 import buildlogic.libraries.fileManagement
+import buildlogic.libraries.hiltAndroid
 import buildlogic.libraries.instrumentationTests
 import buildlogic.libraries.logging
+import buildlogic.libraries.rx
 import buildlogic.libraries.unitTests
 import com.android.build.gradle.internal.dsl.DefaultConfig
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    id("buildlogic.libraries")
     id("com.android.application")
+    id("dagger.hilt.android.plugin")
     kotlin("android")
     kotlin("android.extensions")
     kotlin("kapt")
     id("androidx.navigation.safeargs")
-    id("buildlogic.libraries")
 }
 
 val appId = "com.olderworld.app.uploader"
@@ -27,7 +30,7 @@ android {
         targetSdkVersion(30)
         versionCode = 1
         versionName = "1.0"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "$appId.TestAppTestRunner"
 
         addStringConstant(
             name = "ACTION_UPLOAD",
@@ -72,6 +75,8 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(project(":feature-uploader"))
 
+    rx()
+    hiltAndroid()
     coreUI()
     fileManagement()
     logging()

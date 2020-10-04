@@ -1,10 +1,15 @@
-import buildlogic.libraries.*
+import buildlogic.libraries.hiltAndroid
+import buildlogic.libraries.logging
+import buildlogic.libraries.networking
+import buildlogic.libraries.rx
+import buildlogic.libraries.unitTests
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    id("buildlogic.libraries")
     id("com.android.library")
     kotlin("android")
-    id("buildlogic.libraries")
+    kotlin("kapt")
 }
 
 android {
@@ -47,6 +52,7 @@ dependencies {
 
     implementation(libs.utils.androidCollections)
 
+    hiltAndroid()
     logging()
     rx()
     networking()

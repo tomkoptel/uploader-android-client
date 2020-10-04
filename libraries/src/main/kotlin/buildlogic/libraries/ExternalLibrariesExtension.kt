@@ -6,6 +6,7 @@ abstract class ExternalLibrariesExtension {
     val utils = Utils
     val ui = UI
     val network = Network
+    val di = DI
 
     object Tests {
         val mockk = "io.mockk:mockk"
@@ -47,5 +48,14 @@ abstract class ExternalLibrariesExtension {
         val navigationUI = "androidx.navigation:navigation-ui-ktx"
         val lifecycleRuntime = "androidx.lifecycle:lifecycle-runtime-ktx"
         val lifecycleExt = "androidx.lifecycle:lifecycle-extensions"
+    }
+
+    object DI {
+        val hiltCore = "com.google.dagger:hilt-core"
+        val hiltAndroid = "com.google.dagger:hilt-android"
+        val hiltCompiler = "com.google.dagger:hilt-android-compiler"
+        val hiltTesting = "com.google.dagger:hilt-android-testing"
+        val hiltViewModel = "androidx.hilt:hilt-lifecycle-viewmodel"
+        val hiltViewModelCompiler = "androidx.hilt:hilt-compiler"
     }
 }

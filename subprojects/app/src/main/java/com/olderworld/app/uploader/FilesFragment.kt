@@ -13,6 +13,7 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.jakewharton.byteunits.DecimalByteUnit
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.content_main.view.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -20,7 +21,8 @@ import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 
-class FilesFragment : Fragment(R.layout.content_main) {
+@AndroidEntryPoint
+internal class FilesFragment : Fragment(R.layout.content_main) {
     companion object {
         private const val PICK_FILE = 0xf11e
     }

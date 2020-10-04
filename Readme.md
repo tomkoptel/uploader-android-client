@@ -11,7 +11,7 @@
 [✓] Setup uploader module
 [✓] Rename package
 [✓] Setup Github project
-[] Setup Hilt
+[✓] Setup Hilt
 [] Refactor request API as FilePicker
 [] Extend Service to consume Uploader and submit progress changes
 [] Transform emissions from the Uploader as Notification

@@ -10,11 +10,18 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.LifecycleService
+import com.olderworld.feature.uploader.Uploader
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 internal class FileUploaderService : LifecycleService() {
     companion object {
         private const val NOTIFICATION_ID = 0xf11e
     }
+
+    @Inject
+    lateinit var uploader: Uploader
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.action?.let { action ->

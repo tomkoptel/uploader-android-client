@@ -1,6 +1,8 @@
 package com.olderworld.feature.uploader
 
-internal class UpdateTaskStatus(
+import javax.inject.Inject
+
+internal class UpdateTaskStatus @Inject constructor(
     private val taskStore: TaskStore
 ) {
     fun update(status: Task.Status): Task? {

@@ -5,11 +5,11 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.util.UUID
 
-internal fun Uri.asTask() = Task(AndroidTaskMetadata(this))
+fun Uri.asTask() = Task(AndroidTaskMetadata(this))
 
-internal fun File.asTask() = Task(FileTaskMetadata(this))
+fun File.asTask() = Task(FileTaskMetadata(this))
 
-internal fun String.asTask() = Task(PathTaskMetadata(this))
+fun String.asTask() = Task(PathTaskMetadata(this))
 
 internal data class AndroidTaskMetadata(val uri: Uri) : Task.Metadata
 internal data class FileTaskMetadata(val file: File) : Task.Metadata
@@ -26,7 +26,7 @@ internal fun Task.Metadata.asFile(): File = when (this) {
 
 internal typealias TaskState = Task.Status.Type
 
-internal data class Task(
+data class Task internal constructor(
     val id: String,
     val status: Status,
     internal val metadata: Metadata,
@@ -46,7 +46,7 @@ internal data class Task(
 
     internal interface Metadata
 
-    data class Status(
+    data class Status internal constructor(
         val taskId: String,
         val type: Type = Type.PENDING,
         val progress: Int = 0,
@@ -54,9 +54,11 @@ internal data class Task(
     ) {
         val isPending: Boolean get() = type == Type.PENDING
 
-        fun terminated(errorCause: ErrorCause) = copy(progress = 0, type = Type.TERMINATED, errorCause = errorCause)
+        fun terminated(errorCause: ErrorCause) =
+            copy(progress = 0, type = Type.TERMINATED, errorCause = errorCause)
 
-        fun sending(progress: Int) = copy(progress = progress, type = Type.SENDING, errorCause = null)
+        fun sending(progress: Int) =
+            copy(progress = progress, type = Type.SENDING, errorCause = null)
 
         fun completed() = copy(progress = 100, type = Type.COMPLETED, errorCause = null)
 

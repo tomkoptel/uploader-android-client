@@ -75,3 +75,19 @@ fun DependencyHandler.networking() {
 fun DependencyHandler.logging() {
     implementation(libs.utils.timber)
 }
+
+// FIXME investigate why kapt does not recognizes platform
+fun DependencyHandler.hiltAndroid() {
+    val hiltVersion = ":2.29.1-alpha"
+    val hiltViewModelVersion = ":1.0.0-alpha02"
+
+    implementation(libs.di.hiltCore + hiltVersion)
+    implementation(libs.di.hiltAndroid + hiltVersion)
+    add("kapt", libs.di.hiltCompiler + hiltVersion)
+
+    add("kaptAndroidTest", libs.di.hiltCompiler + hiltVersion)
+    androidTestImplementation(libs.di.hiltTesting + hiltVersion)
+
+    implementation(libs.di.hiltViewModel + hiltViewModelVersion)
+    add("kapt", libs.di.hiltViewModelCompiler + hiltViewModelVersion)
+}
