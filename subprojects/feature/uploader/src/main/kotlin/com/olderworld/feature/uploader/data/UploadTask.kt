@@ -33,7 +33,7 @@ internal fun Api.uploadActionFactory(context: Context): (Task) -> Flowable<Task.
 }
 
 internal fun Task.upload(api: Api, context: Context): Flowable<UploadState> = try {
-    val fileMetadata = metadata.toFileMetadata(context) ?: throw FileNotFoundException("$metadata")
+    val fileMetadata = this.toFileMetadata(context) ?: throw FileNotFoundException("$metadata")
 
     Flowables.create<UploadState>(BackpressureStrategy.LATEST) { emitter ->
         try {

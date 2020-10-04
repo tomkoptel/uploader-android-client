@@ -34,6 +34,7 @@ internal class FilesFragment : Fragment(R.layout.content_main) {
         view.pickFiles?.setOnClickListener {
             selectFilesForUpload()
         }
+        view.toolbar.setTitle(R.string.files_for_upload)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -88,7 +89,7 @@ internal class FilesFragment : Fragment(R.layout.content_main) {
             }
             is FilesViewModel.State.ActiveUploads -> {
                 adapter.clear()
-                adapter.addAll(state.asStringList)
+                adapter.addAll(state.tasks)
             }
         }
         adapter.notifyDataSetChanged()

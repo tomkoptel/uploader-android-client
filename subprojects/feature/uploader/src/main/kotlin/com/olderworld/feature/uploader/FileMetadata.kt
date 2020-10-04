@@ -6,45 +6,45 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 
-internal fun Task.Metadata.toFileMetadata(context: Context): FileMetadata? = when (this) {
-    is AndroidTaskMetadata -> {
-        context.contentResolver.openInputStream(uri)?.let { inputStream ->
-            DocumentFile.fromSingleUri(context, uri)?.let {
-                FileMetadata(
-                    length = it.length(),
-                    name = it.name,
-                    mimeType = it.type
-                ) {
-                    inputStream
+fun Task.toFileMetadata(context: Context): FileMetadata? {
+    return when (val metadata = this.metadata) {
+        is AndroidTaskMetadata -> {
+            context.contentResolver.openInputStream(metadata.uri)?.let { inputStream ->
+                DocumentFile.fromSingleUri(context, metadata.uri)?.let {
+                    FileMetadata(
+                        length = it.length(),
+                        name = it.name,
+                        mimeType = it.type
+                    ) {
+                        inputStream
+                    }
                 }
             }
         }
+        is FileTaskMetadata -> {
+            metadata.file.toFileMetadata()
+        }
+        is PathTaskMetadata -> {
+            File(metadata.path).toFileMetadata()
+        }
+        else -> throw IllegalArgumentException("We can not process metadata of type $this")
     }
-    is FileTaskMetadata -> {
-        FileMetadata(
-            length = file.length(),
-            name = file.name
-        ) { FileInputStream(file) }
-    }
-    is PathTaskMetadata -> {
-        val file = File(path)
-        FileMetadata(
-            length = file.length(),
-            name = file.name,
-        ) { FileInputStream(file) }
-    }
-    else -> throw IllegalArgumentException("We can not process metadata of type $this")
 }
 
-internal data class FileMetadata(
+private fun File.toFileMetadata() = FileMetadata(
+    length = length(),
+    name = name
+) { FileInputStream(this) }
+
+class FileMetadata(
     val length: Long,
     val name: String,
     val mimeType: String,
-    val inputStreamProvider: () -> InputStream
+    internal val inputStreamProvider: () -> InputStream
 ) {
     val inputStream: InputStream get() = inputStreamProvider()
 
-    companion object {
+    internal companion object {
         operator fun invoke(
             length: Long,
             name: String? = null,
@@ -56,5 +56,29 @@ internal data class FileMetadata(
             mimeType = mimeType ?: "application/octet-stream",
             inputStreamProvider = inputStreamProvider
         )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as FileMetadata
+
+        if (length != other.length) return false
+        if (name != other.name) return false
+        if (mimeType != other.mimeType) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = length.hashCode()
+        result = 31 * result + name.hashCode()
+        result = 31 * result + mimeType.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "FileMetadata(length=$length, name='$name', mimeType='$mimeType')"
     }
 }
