@@ -6,11 +6,13 @@ import android.app.NotificationManager.IMPORTANCE_LOW
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Intent
+import android.content.collectUris
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.LifecycleService
 import com.olderworld.feature.uploader.Uploader
+import com.olderworld.feature.uploader.asTask
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -21,13 +23,36 @@ internal class FileUploaderService : LifecycleService() {
     }
 
     @Inject
-    lateinit var uploader: Uploader
+    lateinit var uploaderLifecycleObserver: UploaderLifecycleObserver
+    lateinit var notificationManagerCompat: NotificationManagerCompat
+
+    override fun onCreate() {
+        super.onCreate()
+        notificationManagerCompat = NotificationManagerCompat.from(applicationContext)
+
+        lifecycle.addObserver(uploaderLifecycleObserver)
+        uploaderLifecycleObserver.state.observe(this) { upload ->
+            when (upload.isFinished) {
+                true -> stopForeground(true)
+                false -> updateNotification(upload)
+            }
+        }
+    }
+
+    private fun updateNotification(state: Uploader.State) {
+        buildNotification(state.progress, state.total).let {
+            notificationManagerCompat.notify(NOTIFICATION_ID, it)
+        }
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.action?.let { action ->
             when (action) {
                 BuildConfig.ACTION_UPLOAD -> {
-                    val notification = buildNotification()
+                    val tasks = intent.collectUris().map { it.asTask() }
+                    uploaderLifecycleObserver.uploader.enqueue(tasks)
+
+                    val notification = buildNotification(0, tasks.size)
                     startForeground(NOTIFICATION_ID, notification)
                 }
             }
@@ -35,7 +60,7 @@ internal class FileUploaderService : LifecycleService() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun buildNotification(): Notification? {
+    private fun buildNotification(progress: Int, total: Int): Notification {
         val activityIntent = PendingIntent.getActivity(
             this,
             0,
@@ -48,22 +73,19 @@ internal class FileUploaderService : LifecycleService() {
             BuildConfig.TRACKING_CHANNEL_ID
         ).apply {
             setAutoCancel(false)
-            // TODO set back to true when dev is done to prevent the user from swipping it out
-            setOngoing(false)
+            setOngoing(true)
 
             setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL)
             setSmallIcon(R.mipmap.ic_launcher_round)
 
             setContentTitle(getString(R.string.uploading_notification_content_title))
-            setContentText(getString(R.string.uploading_notification_content_text, 1))
+            setContentText(getString(R.string.uploading_notification_content_text, total))
             setContentIntent(activityIntent)
 
-            setProgress(10, 1, false)
+            setProgress(100, progress, false)
         }
         val channelName = getString(R.string.tracking_notification_channel_name)
 
-        val notificationManagerCompat =
-            NotificationManagerCompat.from(applicationContext)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 BuildConfig.TRACKING_CHANNEL_ID,
@@ -73,7 +95,6 @@ internal class FileUploaderService : LifecycleService() {
             notificationManagerCompat.createNotificationChannel(channel)
         }
 
-        val notification = notificationCompatBuilder.build()
-        return notification
+        return notificationCompatBuilder.build()
     }
 }

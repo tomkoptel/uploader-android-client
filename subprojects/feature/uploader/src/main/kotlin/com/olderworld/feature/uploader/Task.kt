@@ -2,8 +2,8 @@ package com.olderworld.feature.uploader
 
 import android.net.Uri
 import java.io.File
-import java.io.FileNotFoundException
 import java.util.UUID
+
 
 fun Uri.asTask() = Task(AndroidTaskMetadata(this))
 
@@ -14,15 +14,6 @@ fun String.asTask() = Task(PathTaskMetadata(this))
 internal data class AndroidTaskMetadata(val uri: Uri) : Task.Metadata
 internal data class FileTaskMetadata(val file: File) : Task.Metadata
 internal data class PathTaskMetadata(val path: String) : Task.Metadata
-
-internal fun Task.Metadata.asFile(): File = when (this) {
-    is AndroidTaskMetadata -> {
-        uri.path?.let { File(it) } ?: throw FileNotFoundException("Can not find file $uri")
-    }
-    is FileTaskMetadata -> file
-    is PathTaskMetadata -> File(path)
-    else -> throw IllegalArgumentException("We can not process metadata of type $this")
-}
 
 internal typealias TaskState = Task.Status.Type
 

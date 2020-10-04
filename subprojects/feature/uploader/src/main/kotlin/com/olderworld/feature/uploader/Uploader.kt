@@ -17,5 +17,15 @@ interface Uploader {
         val sending: Int = 0,
         val terminated: Int = 0,
         val completed: Int = 0,
-    )
+    ) {
+        val total get() = pending + sending + terminated + completed
+
+        val progress: Int
+            get() {
+                if (total == 0) return 0
+                return (((completed + terminated) * 100) / total)
+            }
+
+        val isFinished: Boolean get() = progress == 100
+    }
 }

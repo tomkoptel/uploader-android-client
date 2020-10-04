@@ -3,14 +3,17 @@ package com.olderworld.app.uploader
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Intent
+import android.content.collectUris
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
 import android.text.format.Formatter
 import android.view.View
+import android.widget.ArrayAdapter
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.jakewharton.byteunits.DecimalByteUnit
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,8 +30,19 @@ internal class FilesFragment : Fragment(R.layout.content_main) {
         private const val PICK_FILE = 0xf11e
     }
 
+    private val viewModel: FilesViewModel by viewModels()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val adapter = ArrayAdapter<String>(view.context, android.R.layout.simple_list_item_1)
+        view.listView.adapter = adapter
+
+        viewModel.bind()
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            updateUIState(state, adapter)
+        }
+
         view.pickFiles?.setOnClickListener {
             val packageManager = requireActivity().packageManager
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -52,11 +66,39 @@ internal class FilesFragment : Fragment(R.layout.content_main) {
         }
     }
 
+    private fun updateUIState(
+        state: FilesViewModel.State?,
+        adapter: ArrayAdapter<String>
+    ) {
+        when (state) {
+            is FilesViewModel.State.NoUploads -> {
+                adapter.add("No active uploads")
+            }
+            is FilesViewModel.State.ActiveUploads -> {
+                adapter.clear()
+                adapter.addAll(state.asStringList)
+            }
+        }
+        adapter.notifyDataSetChanged()
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Timber.d("onActivityResult(requestCode=$requestCode, resultCode=$resultCode, data=$data")
         if (requestCode == PICK_FILE && resultCode == Activity.RESULT_OK) {
-            val uris = data?.collectUris() ?: return
-            uris.forEach { dumpUri(it) }
+            if (data != null) {
+                val uris = data.collectUris()
+                if (uris.isNotEmpty()) {
+                    Intent(
+                        context,
+                        FileUploaderService::class.java
+                    ).let {
+                        it.action = BuildConfig.ACTION_UPLOAD
+                        it.data = data.data
+                        it.clipData = data.clipData
+                        requireActivity().startService(it)
+                    }
+                }
+            }
         }
     }
 
@@ -140,19 +182,6 @@ internal class FilesFragment : Fragment(R.layout.content_main) {
         return stringBuilder.toString()
     }
 
-    private fun Intent.collectUris(): List<Uri> {
-        return when (val clipData = this.clipData) {
-            null -> listOfNotNull(data)
-            else -> {
-                val list = mutableListOf<Uri>()
-                for (i in 0 until clipData.itemCount) {
-                    val uri = clipData.getItemAt(i).uri
-                    list.add(uri)
-                }
-                return list
-            }
-        }
-    }
 
     private fun DocumentFile.timberDebugInfo() {
         val directory = this.isDirectory

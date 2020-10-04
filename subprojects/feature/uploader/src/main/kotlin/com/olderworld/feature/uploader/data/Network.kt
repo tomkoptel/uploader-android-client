@@ -6,7 +6,7 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 
 internal fun OkHttpClient.Builder.verboseLogging() = addInterceptor(
-    HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
+    HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.HEADERS }
 )
 
 internal fun baseRetrofit(client: OkHttpClient): Retrofit.Builder = Retrofit.Builder()

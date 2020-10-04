@@ -5,12 +5,14 @@ import com.olderworld.feature.uploader.data.baseRetrofit
 import com.olderworld.feature.uploader.data.upload
 import com.olderworld.feature.uploader.data.uploadActionFactory
 import com.olderworld.feature.uploader.data.verboseLogging
+import io.mockk.mockk
 import io.reactivex.rxjava3.schedulers.Schedulers
 import okhttp3.OkHttpClient
 import okreplay.OkReplay
 import okreplay.OkReplayConfig
 import okreplay.OkReplayInterceptor
 import okreplay.RecorderRule
+import okreplay.TapeMode
 import org.amshove.kluent.shouldContain
 import org.amshove.kluent.shouldContainSame
 import org.junit.Rule
@@ -45,11 +47,11 @@ internal class FunctionalTests {
     }
 
     @Test
-    @OkReplay("upload_kitten")
+    @OkReplay("upload_kitten", TapeMode.WRITE_ONLY)
     fun `happy case of 1 upload with task flowable`() {
         kitten { url ->
             val testObserver = url.file.asTask()
-                .upload(api)
+                .upload(api, mockk())
                 .test()
 
             testObserver.await(10, TimeUnit.SECONDS)
@@ -88,7 +90,7 @@ internal class FunctionalTests {
             ioScheduler,
             taskStore,
             uploaderStateAggregator,
-            api.uploadActionFactory()
+            api.uploadActionFactory(mockk())
         )
 
         kitten { url ->

@@ -58,7 +58,7 @@ android {
         main.java.srcDirs("src/main/kotlin", "src/main/kotlinX")
 
         val test by getting
-        test.java.srcDirs("src/test/kotlin", "src/main/kotlinX")
+        test.java.srcDirs("src/test/kotlin", "src/test/kotlinX")
     }
     testOptions {
         unitTests.isIncludeAndroidResources = true

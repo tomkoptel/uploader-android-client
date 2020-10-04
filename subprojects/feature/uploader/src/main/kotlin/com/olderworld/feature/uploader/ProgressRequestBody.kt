@@ -1,22 +1,18 @@
 package com.olderworld.feature.uploader
 
-import io.reactivex.rxjava3.core.Single
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody
 import okio.BufferedSink
 import okio.source
-import java.io.File
 import java.io.FileNotFoundException
 
 @Throws(FileNotFoundException::class)
-internal fun progressRequestBody(
-    file: File,
-    mimeType: String = "application/octet-stream",
+internal fun FileMetadata.toProgressRequestBody(
     onProgress: (progress: Int) -> Unit
 ): RequestBody {
     val mediaType = mimeType.toMediaType()
-    return ProgressRequestBody(mediaType, file, onProgress)
+    return ProgressRequestBody(mediaType, this, onProgress)
 }
 
 /**
@@ -25,15 +21,15 @@ internal fun progressRequestBody(
  */
 private class ProgressRequestBody(
     private val mediaType: MediaType,
-    private val file: File,
+    private val fileMetadata: FileMetadata,
     private val progressEmitter: (progress: Int) -> Unit
 ) : RequestBody() {
     override fun contentType() = mediaType
 
-    override fun contentLength() = file.length()
+    override fun contentLength() = fileMetadata.length
 
     override fun writeTo(sink: BufferedSink) {
-        file.source().use { source ->
+        fileMetadata.inputStream.source().use { source ->
             val total = contentLength()
             var remaining = total
             var size = BUFFER_SIZE.coerceAtMost(remaining)

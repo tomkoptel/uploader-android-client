@@ -6,6 +6,7 @@
     Apps that target Android 9 (API level 28) or higher and use foreground services must request the FOREGROUND_SERVICE permission.
     -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".UploaderApp"

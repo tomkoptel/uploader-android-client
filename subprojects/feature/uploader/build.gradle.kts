@@ -1,3 +1,4 @@
+import buildlogic.libraries.fileManagement
 import buildlogic.libraries.hiltAndroid
 import buildlogic.libraries.logging
 import buildlogic.libraries.networking
@@ -52,6 +53,7 @@ dependencies {
 
     implementation(libs.utils.androidCollections)
 
+    fileManagement()
     hiltAndroid()
     logging()
     rx()

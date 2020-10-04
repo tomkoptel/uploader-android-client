@@ -24,7 +24,10 @@ internal class UploaderImpl(
     private val statusObservable: Flowable<Task.Status>
 
     init {
-        val createNewTasks = taskSubject
+        statusObservable = statusSubject.share().onBackpressureLatest()
+
+        val taskStream = taskSubject.onBackpressureBuffer(10)
+        val createNewTasks = taskStream
             .filter { it.status.isPending }
             .flatMapSingle { task ->
                 Completable.fromCallable { taskStore.save(task) }
@@ -33,9 +36,9 @@ internal class UploaderImpl(
                     .subscribeOn(persistScheduler)
             }
 
-        val uploadTasks = taskSubject
+        val uploadTasks = taskStream
             // Ensure that we do emit initial status
-            .flatMap { task ->
+            .flatMap({ task ->
                 uploadActionFactory(task)
                     // We are only interested in running/error state
                     .filter { !it.isPending }
@@ -49,10 +52,10 @@ internal class UploaderImpl(
                     .doOnComplete { Timber.d("upload task completed ${taskStore.getBy(task.id)}") }
                     .onErrorReturn { task.status.terminated(it.toErrorCause()) }
                     .subscribeOn(persistScheduler)
-            }
+            }, 10)
 
         // TODO Check failure of persisting the value. What would happen?
-        val updateTaskStatus = statusSubject
+        val updateTaskStatus = statusObservable
             .filter { !it.isPending }
             .flatMapMaybe { status ->
                 Maybe.fromCallable<Task> { updateTaskStatus.update(status) }
@@ -60,10 +63,6 @@ internal class UploaderImpl(
                     .onErrorReturn { status.terminated(it.toErrorCause()) }
                     .subscribeOn(persistScheduler)
             }
-
-        statusObservable = statusSubject
-            .share()
-            .onBackpressureLatest()
 
         createNewTasks.subscribeBy(
             onNext = statusSubject::onNext,
