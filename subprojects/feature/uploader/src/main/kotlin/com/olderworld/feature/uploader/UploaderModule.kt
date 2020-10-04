@@ -16,10 +16,16 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-internal object UploaderModule {
+internal class UploaderModule {
     @Singleton
     @Provides
-    fun taskStore(): TaskStore = InMemoryTaskStore()
+    fun appTaskStore(): TaskStoreObserver = InMemoryTaskStore().observer()
+
+    @Provides
+    fun TaskStoreObserver.taskStore(): TaskStore = this
+
+    @Provides
+    fun TaskStoreObserver.rxTasks(): RxTasks = this
 
     @Singleton
     @Provides
