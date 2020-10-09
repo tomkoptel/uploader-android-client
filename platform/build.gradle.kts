@@ -65,11 +65,17 @@ dependencies {
         api(libs.ui.constraintlayout) {
             version { prefer("2.0.1") }
         }
-        api(libs.ui.lifecycleRuntime) {
-            version { prefer("2.3.0-alpha07") }
+        api(libs.ui.lifecycleCommonJava8) {
+            version { require("2.3.0-beta01") }
         }
         api(libs.ui.lifecycleExt) {
             version { prefer("2.2.0") }
+        }
+        api(libs.ui.fragmentKtx) {
+            version { require("1.3.0-beta01") }
+        }
+        api(libs.ui.activityKtx) {
+            version { require("1.2.0-beta01") }
         }
 
         val navigationVersion = "2.3.0"

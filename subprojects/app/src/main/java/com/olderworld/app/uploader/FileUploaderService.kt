@@ -5,8 +5,9 @@ import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_LOW
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
+import android.content.Context
 import android.content.Intent
-import android.content.collectUris
+import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -20,6 +21,13 @@ import javax.inject.Inject
 internal class FileUploaderService : LifecycleService() {
     companion object {
         private const val NOTIFICATION_ID = 0xf11e
+        private const val FILE_URIS = "FILE_URIS"
+
+        fun intent(context: Context, fileUris: List<Uri>) =
+            Intent(context, FileUploaderService::class.java).let {
+                it.action = BuildConfig.ACTION_UPLOAD
+                it.putExtra(FILE_URIS, fileUris.toTypedArray())
+            }
     }
 
     @Inject
@@ -49,7 +57,7 @@ internal class FileUploaderService : LifecycleService() {
         intent?.action?.let { action ->
             when (action) {
                 BuildConfig.ACTION_UPLOAD -> {
-                    val tasks = intent.collectUris().map { it.asTask() }
+                    val tasks = intent.fileUris().map { it.asTask() }
                     uploaderLifecycleObserver.uploader.enqueue(tasks)
 
                     val notification = buildNotification(0, tasks.size)
@@ -97,4 +105,9 @@ internal class FileUploaderService : LifecycleService() {
 
         return notificationCompatBuilder.build()
     }
+
+    private fun Intent.fileUris(): List<Uri> = getParcelableArrayExtra(FILE_URIS)
+        ?.toList()
+        ?.map { it as Uri }
+        .orEmpty()
 }

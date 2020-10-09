@@ -18,8 +18,8 @@
 * [✓] Setup Github project
 * [✓] Setup Hilt
 * [✓] Extend Service to consume Uploader and submit progress changes
+* [✓] Refactor request API as FilePicker
 * [] Add API to track status per task
-* [] Refactor request API as FilePicker
 * [] Transform emissions from the Uploader as Notification
 * [] Build recycler view around API per task
 * [] Add test cases to imitate failures for the task

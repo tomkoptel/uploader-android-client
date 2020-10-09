@@ -46,8 +46,10 @@ abstract class ExternalLibrariesExtension {
         val constraintlayout = "androidx.constraintlayout:constraintlayout"
         val navigationFragment = "androidx.navigation:navigation-fragment-ktx"
         val navigationUI = "androidx.navigation:navigation-ui-ktx"
-        val lifecycleRuntime = "androidx.lifecycle:lifecycle-runtime-ktx"
         val lifecycleExt = "androidx.lifecycle:lifecycle-extensions"
+        val lifecycleCommonJava8 = "androidx.lifecycle:lifecycle-common-java8"
+        val fragmentKtx = "androidx.fragment:fragment-ktx"
+        val activityKtx = "androidx.activity:activity-ktx"
     }
 
     object DI {

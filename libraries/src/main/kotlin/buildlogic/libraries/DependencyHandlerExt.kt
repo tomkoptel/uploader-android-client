@@ -48,13 +48,15 @@ fun DependencyHandler.coreUI() {
     implementation(libs.ui.materialDesign)
     implementation(libs.ui.constraintlayout)
 
+    implementation(libs.ui.fragmentKtx)
+    implementation(libs.ui.activityKtx)
+
     implementation(libs.ui.navigationFragment)
     implementation(libs.ui.navigationUI)
 
-    // For coroutines
-    implementation(libs.ui.lifecycleRuntime)
     // For LifecycleService dep
     implementation(libs.ui.lifecycleExt)
+    implementation(libs.ui.lifecycleCommonJava8)
 }
 
 fun DependencyHandler.rx() {
