@@ -1,15 +1,8 @@
 package com.olderworld.app.uploader
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager.IMPORTANCE_LOW
-import android.app.PendingIntent
-import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
-import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.LifecycleService
 import com.olderworld.feature.uploader.Uploader
@@ -31,25 +24,22 @@ internal class FileUploaderService : LifecycleService() {
     }
 
     @Inject
-    lateinit var uploaderLifecycleObserver: UploaderLifecycleObserver
-    lateinit var notificationManagerCompat: NotificationManagerCompat
+    lateinit var uploader: Uploader
+
+    @Inject
+    lateinit var notificationManager: NotificationManagerCompat
+
+    @Inject
+    lateinit var notificationFactory: NotificationFactory
 
     override fun onCreate() {
         super.onCreate()
-        notificationManagerCompat = NotificationManagerCompat.from(applicationContext)
 
-        lifecycle.addObserver(uploaderLifecycleObserver)
-        uploaderLifecycleObserver.state.observe(this) { upload ->
-            when (upload.isFinished) {
+        uploader.onStateChange(this) { uploadState ->
+            when (uploadState.isFinished) {
                 true -> stopForeground(true)
-                false -> updateNotification(upload)
+                false -> updateNotification(uploadState)
             }
-        }
-    }
-
-    private fun updateNotification(state: Uploader.State) {
-        buildNotification(state.progress, state.total).let {
-            notificationManagerCompat.notify(NOTIFICATION_ID, it)
         }
     }
 
@@ -58,9 +48,9 @@ internal class FileUploaderService : LifecycleService() {
             when (action) {
                 BuildConfig.ACTION_UPLOAD -> {
                     val tasks = intent.fileUris().map { it.asTask() }
-                    uploaderLifecycleObserver.uploader.enqueue(tasks)
+                    uploader.enqueue(tasks)
 
-                    val notification = buildNotification(0, tasks.size)
+                    val notification = notificationFactory.uploadStatus(tasks.size)
                     startForeground(NOTIFICATION_ID, notification)
                 }
             }
@@ -68,42 +58,10 @@ internal class FileUploaderService : LifecycleService() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun buildNotification(progress: Int, total: Int): Notification {
-        val activityIntent = PendingIntent.getActivity(
-            this,
-            0,
-            Intent(this, MainActivity::class.java),
-            FLAG_UPDATE_CURRENT
-        )
-        // Retrieves NotificationCompat.Builder used to create initial Notification
-        val notificationCompatBuilder = NotificationCompat.Builder(
-            applicationContext,
-            BuildConfig.TRACKING_CHANNEL_ID
-        ).apply {
-            setAutoCancel(false)
-            setOngoing(true)
-
-            setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL)
-            setSmallIcon(R.mipmap.ic_launcher_round)
-
-            setContentTitle(getString(R.string.uploading_notification_content_title))
-            setContentText(getString(R.string.uploading_notification_content_text, total))
-            setContentIntent(activityIntent)
-
-            setProgress(100, progress, false)
+    private fun updateNotification(state: Uploader.State) {
+        notificationFactory.uploadStatus(total = state.total, progress = state.progress).let {
+            notificationManager.notify(NotificationFactory.UPLOAD_NOTIFICATION_ID, it)
         }
-        val channelName = getString(R.string.tracking_notification_channel_name)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                BuildConfig.TRACKING_CHANNEL_ID,
-                channelName,
-                IMPORTANCE_LOW
-            )
-            notificationManagerCompat.createNotificationChannel(channel)
-        }
-
-        return notificationCompatBuilder.build()
     }
 
     private fun Intent.fileUris(): List<Uri> = getParcelableArrayExtra(FILE_URIS)

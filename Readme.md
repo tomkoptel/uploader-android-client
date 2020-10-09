@@ -19,8 +19,8 @@
 * [✓] Setup Hilt
 * [✓] Extend Service to consume Uploader and submit progress changes
 * [✓] Refactor request API as FilePicker
+* [✓] Transform emissions from the Uploader as Notification
 * [] Add API to track status per task
-* [] Transform emissions from the Uploader as Notification
 * [] Build recycler view around API per task
 * [] Add test cases to imitate failures for the task
 * [] Imitate back-pressure issues
