@@ -47,7 +47,7 @@ internal class FilesFragment : Fragment(R.layout.content_main) {
         adapter.clear()
         when (state) {
             is FilesViewModel.State.NoUploads -> {
-                adapter.add("No active uploads")
+                adapter.add(getString(R.string.no_active_uploads))
             }
             is FilesViewModel.State.ActiveUploads -> {
                 adapter.addAll(state.tasks)

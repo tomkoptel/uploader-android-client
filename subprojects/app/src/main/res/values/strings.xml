@@ -6,6 +6,11 @@
     <string name="tracking_notification_channel_name">Tracking</string>
     <string name="uploading_notification_content_title">Uploading Files</string>
     <string name="uploading_notification_content_text">Files to upload %1$d</string>
-    <string name="files_for_upload">Upload Files List</string>
     <!--endregion-->
+
+    <!--region UI-->
+    <string name="files_for_upload">Upload Files List</string>
+    <string name="no_active_uploads">No active uploads</string>
+    <!--endregion-->
+
 </resources>
