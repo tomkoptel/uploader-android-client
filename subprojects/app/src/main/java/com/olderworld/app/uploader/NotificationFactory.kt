@@ -17,10 +17,6 @@ internal class NotificationFactory @Inject constructor(
     private val service: Service,
     private val notificationManager: NotificationManagerCompat
 ) {
-    companion object {
-        const val UPLOAD_NOTIFICATION_ID = 0xf11e
-    }
-
     fun uploadStatus(total: Int, progress: Int = 0): Notification {
         val activityIntent = PendingIntent.getActivity(
             service,

@@ -60,7 +60,7 @@ internal class FileUploaderService : LifecycleService() {
 
     private fun updateNotification(state: Uploader.State) {
         notificationFactory.uploadStatus(total = state.total, progress = state.progress).let {
-            notificationManager.notify(NotificationFactory.UPLOAD_NOTIFICATION_ID, it)
+            notificationManager.notify(NOTIFICATION_ID, it)
         }
     }
 
