@@ -71,7 +71,11 @@ tasks.withType(KotlinCompile::class.java).all {
 }
 
 dependencies {
-    implementation(platform("com.olderwold.uploader:platform"))
+    "com.olderwold.uploader:platform".let { notation ->
+        implementation(platform(notation))
+        kapt(platform(notation))
+        kaptAndroidTest(platform(notation))
+    }
     implementation(kotlin("stdlib-jdk8"))
     implementation(project(":feature-uploader"))
 

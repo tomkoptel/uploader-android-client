@@ -109,5 +109,24 @@ dependencies {
         api(libs.network.okreplayJunit) {
             version { prefer(okReplayVersion) }
         }
+
+        listOf(
+            libs.di.hiltCore,
+            libs.di.hiltAndroid,
+            libs.di.hiltCompiler,
+            libs.di.hiltTesting
+        ).forEach { coordinates ->
+            api(coordinates) {
+                version { require("2.29.1-alpha") }
+            }
+        }
+        listOf(
+            libs.di.hiltViewModel,
+            libs.di.hiltViewModelCompiler
+        ).forEach { coordinates ->
+            api(coordinates) {
+                version { require("1.0.0-alpha02") }
+            }
+        }
     }
 }
